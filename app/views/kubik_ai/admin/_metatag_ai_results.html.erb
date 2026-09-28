@@ -1,0 +1,32 @@
+<% pending = KubikAi::Metatag::SuggestionStore.fetch(metatagable) %>
+<% return unless pending.present? %>
+
+<% tag = metatagable.meta_tag %>
+<% previous = KubikAi::Metatag::PendingApplier::META_FIELDS.index_with { |field| tag&.public_send(field) } %>
+<% suggestion_set = KubikAi.config.suggestion_sets.fetch(:metatag, KubikAi::Suggestions::MetatagSet).for(metatagable) %>
+
+<%= kubik_panel_widget(
+      title: "Review meta suggestions",
+      title_modifier: "kubik-panel-widget__title--emphasized"
+    ) do %>
+  <%= form_with url: KubikAi::Metatag::Paths.apply_path(metatagable),
+                method: :post,
+                data: { turbo: true, turbo_stream: true },
+                html: { class: kubik_panel_form_html_class } do %>
+    <%= kubik_panel_fieldset do %>
+      <%= suggestion_set.render(self, metatagable: metatagable, pending: pending, previous: previous) %>
+    <% end %>
+
+    <% if pending["notes"].present? %>
+      <p class="kubik-panel-widget__notes"><em><%= pending["notes"] %></em></p>
+    <% end %>
+
+    <div class="kubik-action-row">
+      <%= button_tag "Apply changes", type: "submit", class: "button button--compact" %>
+      <%= link_to "Discard",
+                  KubikAi::Metatag::Paths.discard_path(metatagable),
+                  class: "kubik-link-button kubik-link-button--discard",
+                  data: { turbo_method: :post, turbo_stream: true } %>
+    </div>
+  <% end %>
+<% end %>

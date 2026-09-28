@@ -1,0 +1,57 @@
+<% kubik_ai = upload.additional_info.fetch("kubik_ai", {}) %>
+<% status = kubik_ai["status"].presence || "idle" %>
+<% ai_processing = %w[queued processing].include?(status) %>
+<% panel_sync_attrs = KubikAi::Media::PanelSyncAttributes.for(upload) %>
+<% attach_frame_sync = local_assigns.fetch(:attach_frame_sync, false) %>
+
+<% if ai_processing %>
+  <% if attach_frame_sync %>
+    <%= turbo_stream.replace "kubik_ai_frame_#{upload.id}" do %>
+      <%= turbo_frame_tag "kubik_ai_frame_#{upload.id}", data: panel_sync_attrs do %>
+        <%= render partial: "kubik_ai/admin/media_upload_ai_panel", locals: { upload: upload } %>
+      <% end %>
+    <% end %>
+  <% else %>
+    <%= turbo_stream.replace "kubik_ai_panel_#{upload.id}" do %>
+      <%= render partial: "kubik_ai/admin/media_upload_ai_panel", locals: { upload: upload } %>
+    <% end %>
+  <% end %>
+<% else %>
+  <%= turbo_stream.replace "kubik_ai_frame_#{upload.id}" do %>
+    <%= turbo_frame_tag "kubik_ai_frame_#{upload.id}" do %>
+      <%= render partial: "kubik_ai/admin/media_upload_ai_panel", locals: { upload: upload } %>
+    <% end %>
+  <% end %>
+<% end %>
+
+<%= turbo_stream.replace "kubik_ai_trigger_#{upload.id}" do %>
+  <%= turbo_frame_tag "kubik_ai_trigger_#{upload.id}" do %>
+    <%= render partial: "kubik_ai/admin/media_upload_ai_trigger_content", locals: { upload: upload } %>
+  <% end %>
+<% end %>
+
+<% sync_main_form = kubik_ai["pending"].blank? %>
+<% if sync_main_form %>
+  <% tags = KubikAi::Media::TagList.normalize(upload.respond_to?(:media_tag_list) ? upload.media_tag_list : []) %>
+  <%= turbo_stream.update "kubik_ai_tags_sync_#{upload.id}" do %>
+    <%= tag.div(
+          "",
+          data: {
+            controller: "kubik-ai-tags-sync",
+            kubik_ai_tags_sync_tags_value: tags,
+            kubik_ai_tags_sync_upload_id_value: upload.id
+          }
+        ) %>
+  <% end %>
+
+  <% alt_text = KubikAi::Media::FormFieldRenderer.alt_text_value(upload) %>
+  <%= turbo_stream.update "kubik_ai_alt_text_sync_#{upload.id}" do %>
+    <%= tag.div(
+          "",
+          data: {
+            controller: "kubik-ai-alt-text-sync",
+            kubik_ai_alt_text_sync_alt_text_value: alt_text
+          }
+        ) %>
+  <% end %>
+<% end %>

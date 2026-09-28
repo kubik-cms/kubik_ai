@@ -1,0 +1,6 @@
+<%# locals: upload: %>
+<% if upload.image_data.present? &&
+      defined?(Kubik::AiConfiguration) &&
+      Kubik::AiConfiguration.cached.enabled? %>
+  <%= render partial: "kubik_ai/admin/media_upload_ai_trigger", locals: { upload: upload } %>
+<% end %>

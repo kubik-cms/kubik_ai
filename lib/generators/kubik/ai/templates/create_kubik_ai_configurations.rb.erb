@@ -1,0 +1,20 @@
+class CreateKubikAiConfigurations < ActiveRecord::Migration<%= migration_version %>
+  def change
+    return if table_exists?(:kubik_ai_configurations)
+
+    create_table :kubik_ai_configurations do |t|
+      t.boolean :enabled, null: false, default: false
+      t.string :vision_model
+      t.text :site_context
+      t.jsonb :feature_flags, null: false, default: {}
+      t.integer :spend_cap_cents
+      t.string :spend_period, null: false, default: "monthly"
+      t.string :credential_source, null: false, default: "env"
+      t.jsonb :provider_credentials, null: false, default: {}
+      t.integer :singleton_guard, null: false, default: 1
+      t.timestamps
+    end
+
+    add_index :kubik_ai_configurations, :singleton_guard, unique: true
+  end
+end

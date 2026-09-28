@@ -1,0 +1,31 @@
+{
+  "name": "@kubik-cms/kubik_ai",
+  "version": "0.2.0",
+  "license": "MIT",
+  "author": "Primate Inc.",
+  "bugs": {
+    "url": "https://github.com/kubik-cms/kubik_ai/issues"
+  },
+  "homepage": "https://github.com/kubik-cms/kubik_ai",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/kubik-cms/kubik_ai.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "dist/kubik_ai.umd.js",
+  "module": "dist/kubik_ai.es.js",
+  "scripts": {
+    "build": "tsc --noEmit && vite build && cp dist/kubik_ai.es.js ../app/assets/javascript/kubik_ai/kubik_ai.es.js",
+    "test": "echo \"No tests yet\""
+  },
+  "devDependencies": {
+    "@hotwired/stimulus": "^3.2.2",
+    "typescript": "^4.8.2",
+    "vite": "^2.9.15"
+  },
+  "peerDependencies": {
+    "@hotwired/stimulus": "^3.0.1"
+  }
+}

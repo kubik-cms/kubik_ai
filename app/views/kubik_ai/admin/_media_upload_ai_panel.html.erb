@@ -1,0 +1,10 @@
+<% kubik_ai = upload.additional_info.fetch("kubik_ai", {}) %>
+
+<%= kubik_panel_shell(html_class: "kubik-ai-panel", id: "kubik_ai_panel_#{upload.id}") do %>
+  <%= render partial: "kubik_ai/admin/media_upload_ai_cta", locals: { upload: upload } %>
+  <%= render partial: "kubik_ai/admin/media_upload_ai_results", locals: { upload: upload } %>
+  <%= render partial: "kubik_ai/admin/media_upload_ai_history", locals: { upload: upload } %>
+
+  <div id="kubik_ai_alt_text_sync_<%= upload.id %>" class="kubik-ai-panel__alt-sync" hidden aria-hidden="true"></div>
+  <div id="kubik_ai_tags_sync_<%= upload.id %>" class="kubik-ai-panel__tags-sync" hidden aria-hidden="true"></div>
+<% end %>

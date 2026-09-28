@@ -1,0 +1,16 @@
+<% kubik_ai = upload.additional_info.fetch("kubik_ai", {}) %>
+<% history = Array(kubik_ai["history"]) %>
+<% return unless history.any? %>
+
+<%= kubik_panel_audit_table(
+      title: "Previous suggestions",
+      lead: "Suggestions you applied to this image (stored on the media record).",
+      aria_label: "Previous applied AI suggestions",
+      columns: [
+        { key: :when, label: "When", cell_class: "kubik-panel-audit__when" },
+        { key: :alt_text, label: "Alt text", cell_class: "kubik-panel-audit__cell-text" },
+        { key: :tags, label: "Tags", cell_class: "kubik-panel-audit__cell-meta" },
+        { key: :prompt, label: "Prompt", cell_class: "kubik-panel-audit__cell-prompt" }
+      ],
+      rows: kubik_ai_media_upload_history_audit_rows(upload)
+    ) %>

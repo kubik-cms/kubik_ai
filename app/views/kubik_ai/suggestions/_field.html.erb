@@ -1,0 +1,58 @@
+<% suggested = field.suggested_value(pending) %>
+<% current_display = field.current_value(previous || {}) %>
+<% current_empty = current_display == field.empty_current_message %>
+<% record_key = "#{record.model_name.singular}_#{record.id}" %>
+<li class="kubik-panel-field <%= field.type == :textarea ? 'text' : 'string' %> input optional stringish">
+  <label class="label"><%= field.label %></label>
+
+  <%= kubik_panel_field_sub_label("Current", for_id: "kubik_ai_current_#{field.key}_#{record_key}") %>
+  <% if field.type == :textarea %>
+    <%= text_area_tag nil,
+                      current_empty ? "" : current_display,
+                      id: "kubik_ai_current_#{field.key}_#{record_key}",
+                      rows: 3,
+                      disabled: true,
+                      readonly: true,
+                      placeholder: (current_empty ? field.empty_current_message : nil) %>
+  <% else %>
+    <%= text_field_tag nil,
+                       current_empty ? "" : current_display,
+                       id: "kubik_ai_current_#{field.key}_#{record_key}",
+                       disabled: true,
+                       readonly: true,
+                       placeholder: (current_empty ? field.empty_current_message : nil) %>
+  <% end %>
+
+  <% case field.type %>
+  <% when :textarea %>
+    <%= kubik_panel_field_sub_label("Suggested", for_id: "kubik_ai_pending_#{field.key}_#{record_key}") %>
+    <%= text_area_tag "kubik_ai_pending[#{field.key}]",
+                      suggested,
+                      id: "kubik_ai_pending_#{field.key}_#{record_key}",
+                      rows: 3 %>
+  <% when :text %>
+    <%= kubik_panel_field_sub_label("Suggested", for_id: "kubik_ai_pending_#{field.key}_#{record_key}") %>
+    <%= text_field_tag "kubik_ai_pending[#{field.key}]",
+                       suggested,
+                       id: "kubik_ai_pending_#{field.key}_#{record_key}" %>
+  <% when :tags %>
+    <% tag_value = KubikAi::Media::TagList.normalize(suggested).join(", ") %>
+    <% field_id = "kubik_ai_pending_tags_#{record_key}" %>
+    <%= kubik_panel_field_sub_label("Suggested", for_id: field_id) %>
+    <%= KubikInterfaceElements::TagsFieldRenderer.render(
+          self,
+          field_name: "kubik_ai_pending[media_tag_list]",
+          field_id: field_id,
+          value: tag_value,
+          label: "Suggested",
+          suggestions_url: (defined?(tag_suggestions_admin_kubik_media_uploads_path) ? tag_suggestions_admin_kubik_media_uploads_path : nil),
+          value_format: :string,
+          multiselect: true,
+          allow_create: true
+        ) %>
+  <% end %>
+
+  <% if field.hint.present? %>
+    <p class="inline-hints"><%= field.hint %></p>
+  <% end %>
+</li>

@@ -1,0 +1,8 @@
+# frozen_string_literal: true
+
+KubikAi.configure do |config|
+  config.active_admin_menu = { label: "AI", priority: 95, parent: "Website" }
+
+  # Register extra context from host or other Kubik gems:
+  # config.register_context_provider :custom, MyAiContextProvider
+end

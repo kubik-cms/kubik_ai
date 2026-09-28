@@ -1,0 +1,5 @@
+<%= turbo_stream_from upload, :kubik_ai %>
+
+<%= turbo_frame_tag "kubik_ai_trigger_#{upload.id}" do %>
+  <%= render partial: "kubik_ai/admin/media_upload_ai_trigger_content", locals: { upload: upload } %>
+<% end %>

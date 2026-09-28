@@ -1,0 +1,21 @@
+<table class="index_table kubik-ai-metatag-results">
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Current</th>
+      <th>Suggested</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% KubikAi::Metatag::PendingApplier::META_FIELDS.each do |field| %>
+      <tr>
+        <td><%= field.humanize %></td>
+        <td><%= metatagable.meta_tag&.public_send(field) %></td>
+        <td><%= pending[field] || pending[field.to_sym] %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+<% if pending["notes"].present? || pending[:notes].present? %>
+  <p><strong>Notes:</strong> <%= pending["notes"] || pending[:notes] %></p>
+<% end %>

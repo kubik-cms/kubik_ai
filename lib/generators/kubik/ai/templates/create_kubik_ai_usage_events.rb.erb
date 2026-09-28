@@ -1,0 +1,20 @@
+class CreateKubikAiUsageEvents < ActiveRecord::Migration<%= migration_version %>
+  def change
+    return if table_exists?(:kubik_ai_usage_events)
+
+    create_table :kubik_ai_usage_events do |t|
+      t.string :operation, null: false
+      t.string :model
+      t.integer :input_tokens
+      t.integer :output_tokens
+      t.integer :estimated_cost_cents, null: false, default: 0
+      t.string :status, null: false, default: "success"
+      t.text :error_message
+      t.jsonb :metadata, null: false, default: {}
+      t.references :subject, polymorphic: true, index: true
+      t.timestamps
+    end
+
+    add_index :kubik_ai_usage_events, :created_at
+  end
+end

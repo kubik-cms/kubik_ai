@@ -1,0 +1,7 @@
+<% return if metatagable.new_record? %>
+<% return unless defined?(Kubik::AiConfiguration) && Kubik::AiConfiguration.cached.enabled? && Kubik::AiConfiguration.cached.meta_tag_suggestions %>
+
+<div class="kubik-ai-metatag-editor-header">
+  <h3 class="kubik-ai-metatag-editor-header__title">Meta tags configuration</h3>
+  <%= render partial: "kubik_ai/admin/metatag_trigger", locals: { metatagable: metatagable } %>
+</div>

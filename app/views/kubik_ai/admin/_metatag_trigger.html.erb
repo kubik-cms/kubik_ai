@@ -1,0 +1,10 @@
+<% return if metatagable.new_record? %>
+<% return unless defined?(Kubik::AiConfiguration) && Kubik::AiConfiguration.cached.enabled? && Kubik::AiConfiguration.cached.meta_tag_suggestions %>
+
+<%= turbo_stream_from metatagable, :kubik_ai_metatag %>
+
+<%= turbo_frame_tag KubikAi::Metatag::PanelDom.trigger_id(metatagable) do %>
+  <%= render partial: "kubik_ai/admin/metatag_trigger_content", locals: { metatagable: metatagable } %>
+<% end %>
+
+<div id="<%= KubikAi::Metatag::PanelDom.form_sync_id(metatagable) %>" class="kubik-ai-panel__metatag-sync" hidden aria-hidden="true"></div>

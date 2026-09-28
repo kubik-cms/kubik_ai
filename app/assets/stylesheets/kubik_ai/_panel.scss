@@ -1,0 +1,55 @@
+// Meta AI robot must not appear in the Active Admin title action bar (Meta tab only).
+#title_bar .kubik-ai-metatag-trigger {
+  display: none !important;
+}
+
+.kubik-ai-title-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  line-height: 1;
+  vertical-align: middle;
+
+  .material-icon {
+    font-size: 1.5rem;
+  }
+
+  &--legend {
+    color: var(--kubik-interface-color-grey-500, #888);
+
+    .material-icon {
+      font-size: 1.25rem;
+    }
+
+    &:hover,
+    &:focus-visible {
+      color: var(--kubik-interface-color-grey-600, #666);
+    }
+  }
+
+  &--processing .material-icon {
+    animation: kubik-panel-spin 1s linear infinite;
+  }
+}
+
+// Match .active_admin .formtastic fieldset horizontal inset (forms.scss: 0.9rem 1rem).
+.kubik-ai-metatag-editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0.9rem 1rem 15px;
+  padding: 0;
+
+  &__title {
+    margin: 0;
+    padding: 0;
+    border: none;
+    font-size: 1em;
+    font-weight: bold;
+    line-height: 1.4;
+    color: var(--kubik-interface-color-grey-700, #5e6469);
+  }
+}

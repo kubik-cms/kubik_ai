@@ -1,0 +1,56 @@
+<% runtime = KubikAi::Metatag::RuntimeState.fetch(metatagable) %>
+<% pending = KubikAi::Metatag::SuggestionStore.fetch(metatagable).present? %>
+<% status = runtime["status"].presence || "idle" %>
+<% processing = %w[queued processing].include?(status) %>
+<% failed = status == "failed" %>
+<% try_again = pending || failed %>
+<% cta_modifier = if processing
+     "kubik-panel-cta--processing"
+   elsif failed
+     "kubik-panel-cta--failed"
+   end %>
+
+<% status_markup = nil %>
+<% if processing %>
+  <% status_markup = capture do %>
+    <div class="kubik-panel-cta__status kubik-ai-panel__status--processing" role="status" aria-live="polite">
+      <span class="material-symbols-outlined material-icon kubik-panel-cta__spinner">progress_activity</span>
+      <div>
+        <p><strong><%= runtime["status_message"] || "Processing…" %></strong></p>
+      </div>
+    </div>
+  <% end %>
+<% elsif failed %>
+  <% status_markup = capture do %>
+    <div class="kubik-panel-cta__status" role="alert">
+      <p><strong>AI failed</strong></p>
+      <p><%= runtime["status_message"] %></p>
+    </div>
+  <% end %>
+<% elsif status == "completed" && runtime["status_message"].present? && !pending %>
+  <% status_markup = capture do %>
+    <div class="kubik-panel-cta__status" role="status">
+      <p><%= runtime["status_message"] %></p>
+    </div>
+  <% end %>
+<% end %>
+
+<%= kubik_panel_cta(
+      lead: "AI can suggest SEO and social meta tags from this page’s content. Nothing is saved until you apply your choices.",
+      tone: "brand",
+      modifier: cta_modifier,
+      aria_label: "AI meta assistant",
+      status: status_markup
+    ) do %>
+  <% unless processing %>
+    <%= form_with url: KubikAi::Metatag::Paths.suggest_path(metatagable),
+                  method: :post,
+                  data: { turbo: true, turbo_stream: true },
+                  html: { class: "kubik-panel-cta__form" } do %>
+      <div class="kubik-panel-cta__actions">
+        <%= submit_tag(try_again ? "Try again" : "Suggest meta tags with AI",
+                       class: "button kubik-panel-cta__button") %>
+      </div>
+    <% end %>
+  <% end %>
+<% end %>

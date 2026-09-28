@@ -1,0 +1,7 @@
+<% panel_sync_attrs = KubikAi::Media::PanelSyncAttributes.for(upload) %>
+
+<%= turbo_stream_from upload, :kubik_ai %>
+
+<%= turbo_frame_tag "kubik_ai_frame_#{upload.id}", data: panel_sync_attrs do %>
+  <%= render partial: "kubik_ai/admin/media_upload_ai_panel", locals: { upload: upload } %>
+<% end %>

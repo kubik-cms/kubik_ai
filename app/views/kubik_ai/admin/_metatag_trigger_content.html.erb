@@ -1,0 +1,21 @@
+<% runtime = KubikAi::Metatag::RuntimeState.fetch(metatagable) %>
+<% pending = KubikAi::Metatag::SuggestionStore.fetch(metatagable).present? %>
+<% status = runtime["status"].presence || "idle" %>
+<% processing = %w[queued processing].include?(status) %>
+<% panel_url = KubikAi::Metatag::Paths.panel_path(metatagable) %>
+
+<%= kubik_offcanvas_open(
+      url: panel_url,
+      header: "AI meta suggestions",
+      tone: "white",
+      label: "AI meta assistant",
+      html_class: [
+        "kubik-ai-title-action",
+        "kubik-ai-metatag-trigger",
+        "kubik-ai-title-action--legend",
+        ("kubik-ai-title-action--pending" if pending),
+        ("kubik-ai-title-action--processing" if processing)
+      ].compact.join(" "),
+      pending: pending,
+      icon: "smart_toy"
+    ) %>

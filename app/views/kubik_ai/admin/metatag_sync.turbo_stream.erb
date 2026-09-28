@@ -1,0 +1,46 @@
+<% runtime = KubikAi::Metatag::RuntimeState.fetch(metatagable) %>
+<% status = runtime["status"].presence || "idle" %>
+<% ai_processing = %w[queued processing].include?(status) %>
+<% panel_sync_attrs = KubikAi::Metatag::PanelSyncAttributes.for(metatagable) %>
+<% attach_frame_sync = local_assigns.fetch(:attach_frame_sync, false) %>
+<% frame_id = KubikAi::Metatag::PanelDom.frame_id(metatagable) %>
+<% panel_id = KubikAi::Metatag::PanelDom.panel_id(metatagable) %>
+
+<% if ai_processing %>
+  <% if attach_frame_sync %>
+    <%= turbo_stream.replace frame_id do %>
+      <%= turbo_frame_tag frame_id, data: panel_sync_attrs do %>
+        <%= render partial: "kubik_ai/admin/metatag_ai_panel", locals: { metatagable: metatagable } %>
+      <% end %>
+    <% end %>
+  <% else %>
+    <%= turbo_stream.replace panel_id do %>
+      <%= render partial: "kubik_ai/admin/metatag_ai_panel", locals: { metatagable: metatagable } %>
+    <% end %>
+  <% end %>
+<% else %>
+  <%= turbo_stream.replace frame_id do %>
+    <%= turbo_frame_tag frame_id do %>
+      <%= render partial: "kubik_ai/admin/metatag_ai_panel", locals: { metatagable: metatagable } %>
+    <% end %>
+  <% end %>
+<% end %>
+
+<%= turbo_stream.replace KubikAi::Metatag::PanelDom.trigger_id(metatagable) do %>
+  <%= turbo_frame_tag KubikAi::Metatag::PanelDom.trigger_id(metatagable) do %>
+    <%= render partial: "kubik_ai/admin/metatag_trigger_content", locals: { metatagable: metatagable } %>
+  <% end %>
+<% end %>
+
+<% if local_assigns.fetch(:sync_main_form, false) %>
+  <% fields = KubikAi::Metatag::FormSyncFields.for(metatagable) %>
+  <%= turbo_stream.update KubikAi::Metatag::PanelDom.form_sync_id(metatagable) do %>
+    <%= tag.div(
+          "",
+          data: {
+            controller: "kubik-ai-metatag-sync",
+            kubik_ai_metatag_sync_fields_value: fields.to_json
+          }
+        ) %>
+  <% end %>
+<% end %>

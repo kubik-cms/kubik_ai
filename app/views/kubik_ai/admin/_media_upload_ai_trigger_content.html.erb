@@ -1,0 +1,18 @@
+<% kubik_ai = upload.additional_info.fetch("kubik_ai", {}) %>
+<% pending = kubik_ai["pending"].present? %>
+<% processing = %w[queued processing].include?(kubik_ai["status"].presence || "idle") %>
+<% panel_url = kubik_ai_panel_admin_kubik_media_upload_path(upload) %>
+<%= kubik_offcanvas_open(
+      url: panel_url,
+      header: "AI suggestions",
+      tone: "white",
+      label: "AI assistant",
+      html_class: [
+        "kubik-ai-title-action",
+        "kubik-ai-title-action--legend",
+        ("kubik-ai-title-action--pending" if pending),
+        ("kubik-ai-title-action--processing" if processing)
+      ].compact.join(" "),
+      pending: pending,
+      icon: "smart_toy"
+    ) %>

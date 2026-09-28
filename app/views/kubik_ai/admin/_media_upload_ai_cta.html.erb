@@ -1,0 +1,73 @@
+<% kubik_ai = upload.additional_info.fetch("kubik_ai", {}) %>
+<% pending = kubik_ai["pending"].present? %>
+<% status = kubik_ai["status"].presence || "idle" %>
+<% processing = %w[queued processing].include?(status) %>
+<% failed = status == "failed" %>
+<% try_again = pending || failed %>
+<% prompt_value = kubik_ai["last_additional_prompt"].presence || kubik_ai.dig("pending", "user_prompt") %>
+<% cta_modifier = if processing
+     "kubik-panel-cta--processing"
+   elsif failed
+     "kubik-panel-cta--failed"
+   end %>
+
+<% status_markup = nil %>
+<% if processing %>
+  <% status_markup = capture do %>
+    <div class="kubik-panel-cta__status" role="status" aria-live="polite">
+      <span class="material-symbols-outlined material-icon kubik-panel-cta__spinner">progress_activity</span>
+      <div>
+        <p><strong><%= kubik_ai["status_message"] || "Processing…" %></strong></p>
+        <% if kubik_ai["operation"].present? %>
+          <p><small>Operation: <%= kubik_ai["operation"] %></small></p>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+<% elsif failed %>
+  <% status_markup = capture do %>
+    <div class="kubik-panel-cta__status" role="alert">
+      <p><strong>AI failed</strong></p>
+      <p><%= kubik_ai["status_message"] %></p>
+    </div>
+  <% end %>
+<% elsif status == "completed" && kubik_ai["status_message"].present? && !pending %>
+  <% status_markup = capture do %>
+    <div class="kubik-panel-cta__status" role="status">
+      <p><%= kubik_ai["status_message"] %></p>
+    </div>
+  <% end %>
+<% end %>
+
+<%= kubik_panel_cta(
+      lead: "AI can suggest alt text and tags for this image. Nothing is saved to the media record until you apply your choices.",
+      tone: "brand",
+      modifier: cta_modifier,
+      aria_label: "AI assistant",
+      status: status_markup
+    ) do %>
+  <% unless processing %>
+    <%= form_with url: kubik_ai_reinterpret_admin_kubik_media_upload_path(upload),
+                  method: :post,
+                  data: { turbo: true, turbo_stream: true },
+                  html: { class: "kubik-panel-cta__form" } do %>
+      <div class="kubik-panel-cta__prompt">
+        <%= label_tag "kubik_ai_additional_prompt_#{upload.id}",
+                      "Additional instructions (optional)",
+                      class: "kubik-panel-cta__prompt-label" %>
+        <p class="kubik-panel-cta__prompt-hint">
+          Used only when you click Reinterpret — not on the first automatic analysis. Plain English is fine; say what to change in alt text and/or tags.
+        </p>
+        <%= text_field_tag "kubik_ai[additional_prompt]",
+                           prompt_value,
+                           id: "kubik_ai_additional_prompt_#{upload.id}",
+                           class: "kubik-panel-cta__prompt-input",
+                           placeholder: "e.g. UK English; alt under 80 chars; tag sunset and pier",
+                           autocomplete: "off" %>
+      </div>
+      <div class="kubik-panel-cta__actions">
+        <%= submit_tag(try_again ? "Try again" : "Reinterpret with AI", class: "button kubik-panel-cta__button") %>
+      </div>
+    <% end %>
+  <% end %>
+<% end %>

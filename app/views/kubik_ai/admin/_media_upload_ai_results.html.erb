@@ -1,0 +1,38 @@
+<% kubik_ai = upload.additional_info.fetch("kubik_ai", {}) %>
+<% pending = kubik_ai["pending"] %>
+<% return unless pending.present? %>
+
+<% previous = pending["previous"] || {} %>
+<% suggestion_set = KubikAi.config.suggestion_sets.fetch(:media_upload, KubikAi::Suggestions::MediaUploadSet).for(upload) %>
+
+<%= kubik_panel_widget(
+      title: "Review suggestions",
+      title_modifier: "kubik-panel-widget__title--emphasized"
+    ) do %>
+  <%= form_with url: kubik_ai_apply_pending_admin_kubik_media_upload_path(upload),
+                method: :post,
+                data: { turbo: true, turbo_stream: true },
+                html: { class: kubik_panel_form_html_class } do %>
+    <%= kubik_panel_fieldset do %>
+      <%= suggestion_set.render(self, upload: upload, pending: pending, previous: previous) %>
+    <% end %>
+
+    <% if pending["user_prompt"].present? %>
+      <p class="kubik-panel-widget__notes">
+        <strong>Your instructions:</strong> <%= pending["user_prompt"] %>
+      </p>
+    <% end %>
+
+    <% if pending["notes"].present? %>
+      <p class="kubik-panel-widget__notes"><em><%= pending["notes"] %></em></p>
+    <% end %>
+
+    <div class="kubik-action-row">
+      <%= button_tag "Apply changes", type: "submit", class: "button button--compact" %>
+      <%= link_to "Discard",
+                  kubik_ai_discard_pending_admin_kubik_media_upload_path(upload),
+                  class: "kubik-link-button kubik-link-button--discard",
+                  data: { turbo_method: :post, turbo_stream: true } %>
+    </div>
+  <% end %>
+<% end %>
