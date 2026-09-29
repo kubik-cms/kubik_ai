@@ -44,6 +44,7 @@ require "kubik_ai/metatag"
 require "kubik_ai/active_admin/metatag_actions"
 require "kubik_ai/media_upload_extension"
 require "kubik_ai/media_upload_helper"
+require "kubik_ai/metatag_admin_helper"
 
 module KubikAi
   class << self
@@ -80,6 +81,7 @@ module KubikAi
       initializer "kubik_ai.view_helpers" do
         ActiveSupport.on_load(:action_view) do
           include KubikAi::MediaUploadHelper
+          include KubikAi::MetatagAdminHelper
         end
       end
 
