@@ -13,9 +13,11 @@ module KubikAi
         { key: "twitter_card_type", label: "Twitter card type", type: :text }
       ].freeze
 
-      def self.for(_record)
+      def self.for(_record, focus: nil)
+        keys = KubikAi::Metatag::Focus.fields_for(focus)
+        fields = FIELDS.select { |field| keys.include?(field[:key]) }
         Set.new(
-          FIELDS.map do |field|
+          fields.map do |field|
             Field.new(
               field[:key],
               label: field[:label],

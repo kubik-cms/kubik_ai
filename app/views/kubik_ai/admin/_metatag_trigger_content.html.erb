@@ -1,14 +1,17 @@
-<% runtime = KubikAi::Metatag::RuntimeState.fetch(metatagable) %>
-<% pending = KubikAi::Metatag::SuggestionStore.fetch(metatagable).present? %>
+<% focus = local_assigns[:focus] %>
+<% runtime = KubikAi::Metatag::RuntimeState.fetch(metatagable, focus: focus) %>
+<% pending = KubikAi::Metatag::SuggestionStore.fetch(metatagable, focus: focus).present? %>
 <% status = runtime["status"].presence || "idle" %>
 <% processing = %w[queued processing].include?(status) %>
-<% panel_url = KubikAi::Metatag::Paths.panel_path(metatagable) %>
+<% panel_url = KubikAi::Metatag::Paths.panel_path(metatagable, focus: focus) %>
+<% panel_header = KubikAi::Metatag::Focus.panel_header(focus) %>
+<% trigger_label = KubikAi::Metatag::Focus.trigger_label(focus) %>
 
 <%= kubik_offcanvas_open(
       url: panel_url,
-      header: "AI meta suggestions",
+      header: panel_header,
       tone: "white",
-      label: "AI meta assistant",
+      label: trigger_label,
       html_class: [
         "kubik-ai-title-action",
         "kubik-ai-metatag-trigger",

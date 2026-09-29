@@ -5,8 +5,10 @@ module KubikAi
     module PanelSyncAttributes
       module_function
 
-      def for(record)
-        state = RuntimeState.fetch(record)
+      def for(record, focus: nil)
+        return {} if KubikAi.config.metatag_broadcast_only
+
+        state = RuntimeState.fetch(record, focus: focus)
         status = state["status"].presence || "idle"
         return {} unless %w[queued processing].include?(status)
 

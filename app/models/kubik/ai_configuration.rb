@@ -18,6 +18,8 @@ module Kubik
       tag_vocabulary_hints
     ].freeze
 
+    CONTEXT_INSTRUCTION_KEYS = %i[media seo social].freeze
+
     FEATURE_FLAG_KEYS.each do |key|
       define_method(key) do
         feature_flags.with_indifferent_access[key]
@@ -26,6 +28,17 @@ module Kubik
       define_method("#{key}=") do |value|
         cast_value = key == :tag_vocabulary_hints ? value : ActiveModel::Type::Boolean.new.cast(value)
         self.feature_flags = feature_flags.merge(key.to_s => cast_value)
+      end
+    end
+
+    CONTEXT_INSTRUCTION_KEYS.each do |key|
+      define_method("context_#{key}") do
+        context_instructions.with_indifferent_access[key]
+      end
+
+      define_method("context_#{key}=") do |value|
+        stored = (self[:context_instructions] || {}).stringify_keys
+        self[:context_instructions] = stored.merge(key.to_s => value.to_s.strip)
       end
     end
 
@@ -38,6 +51,7 @@ module Kubik
         record.credential_source = "env"
         record.spend_period = "monthly"
         record.feature_flags = default_feature_flags
+        record.context_instructions = default_context_instructions
         record.provider_credentials = {}
       end
     end
@@ -57,6 +71,15 @@ module Kubik
     def feature_flags
       stored = super.presence || {}
       self.class.default_feature_flags.stringify_keys.merge(stored.stringify_keys)
+    end
+
+    def self.default_context_instructions
+      CONTEXT_INSTRUCTION_KEYS.index_with { "" }.stringify_keys
+    end
+
+    def context_instructions
+      stored = self[:context_instructions].presence || {}
+      self.class.default_context_instructions.merge(stored.stringify_keys)
     end
 
     def to_s

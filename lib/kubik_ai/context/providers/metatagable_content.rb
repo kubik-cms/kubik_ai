@@ -12,7 +12,7 @@ module KubikAi
         end
 
         def available?
-          @metatagable.present?
+          @metatagable.present? && extract_text(@metatagable).present?
         end
 
         def heading
@@ -26,27 +26,7 @@ module KubikAi
         private
 
         def extract_text(record)
-          parts = []
-          parts << record.title if record.respond_to?(:title) && record.title.present?
-          parts << record.name if record.respond_to?(:name) && record.name.present?
-          parts << record.header if record.respond_to?(:header) && record.header.present?
-          parts << record.subheader if record.respond_to?(:subheader) && record.subheader.present?
-          parts << record.listing_summary if record.respond_to?(:listing_summary) && record.listing_summary.present?
-          parts << record.description if record.respond_to?(:description) && record.description.present?
-          parts << plain_content(record.content) if record.respond_to?(:content) && record.content.present?
-          parts << plain_content(record.additional_content) if record.respond_to?(:additional_content) && record.additional_content.present?
-          parts.compact.join("\n\n")
-        end
-
-        def plain_content(raw)
-          return "" if raw.blank?
-
-          if defined?(Kubik::WysiwygHelper)
-            strip_tags = ActionController::Base.helpers
-            strip_tags.sanitize(raw.to_s, tags: [])
-          else
-            raw.to_s
-          end
+          KubikAi::Metatag::ContentExtractor.extract(record)
         end
       end
     end

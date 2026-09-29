@@ -16,7 +16,9 @@ require "kubik_ai/context/providers/base"
 require "kubik_ai/context/providers/site"
 require "kubik_ai/context/providers/kubik_settings"
 require "kubik_ai/context/providers/seo"
+require "kubik_ai/metatag/content_fields"
 require "kubik_ai/context/providers/metatagable_content"
+require "kubik_ai/context/scopes"
 require "kubik_ai/context/compiler"
 
 require "kubik_ai/usage/limiter"
@@ -120,6 +122,26 @@ module KubikAi
         if defined?(Kubik::MediaUpload)
           Kubik::MediaUpload.include(KubikAi::MediaUploadExtension) unless Kubik::MediaUpload.include?(KubikAi::MediaUploadExtension)
         end
+
+        next unless defined?(KubikAi::Metatag::StaleRecovery)
+
+        KubikAi::Metatag::RuntimeState.singleton_class.prepend(
+          Module.new do
+            def fetch(record, focus: nil)
+              KubikAi::Metatag::StaleRecovery.reconcile!(record, focus: focus)
+              super
+            end
+          end
+        )
+
+        KubikAi::Metatag::SyncStream.singleton_class.prepend(
+          Module.new do
+            def render(record)
+              KubikAi::Metatag::StaleRecovery.reconcile_all_focuses!(record)
+              super
+            end
+          end
+        )
       end
     end
   end

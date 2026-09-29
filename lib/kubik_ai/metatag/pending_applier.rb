@@ -8,20 +8,21 @@ module KubikAi
         twitter_title twitter_description twitter_card_type
       ].freeze
 
-      def self.apply!(record, overrides: {})
-        new(record).apply!(overrides: overrides)
+      def self.apply!(record, overrides: {}, focus: nil)
+        new(record, focus: focus).apply!(overrides: overrides)
       end
 
-      def self.discard!(record)
-        new(record).discard!
+      def self.discard!(record, focus: nil)
+        new(record, focus: focus).discard!
       end
 
-      def initialize(record)
+      def initialize(record, focus: nil)
         @record = record
+        @focus = focus
       end
 
       def apply!(overrides: {})
-        pending = SuggestionStore.fetch(@record)
+        pending = SuggestionStore.fetch(@record, focus: @focus)
         return false unless pending
 
         merged = pending.merge(overrides.stringify_keys)
@@ -34,14 +35,14 @@ module KubikAi
         end
 
         tag.save!
-        SuggestionStore.clear!(@record)
+        SuggestionStore.clear!(@record, focus: @focus)
         Broadcaster.broadcast!(@record)
         true
       end
 
       def discard!
-        cleared = SuggestionStore.fetch(@record).present?
-        SuggestionStore.clear!(@record)
+        cleared = SuggestionStore.fetch(@record, focus: @focus).present?
+        SuggestionStore.clear!(@record, focus: @focus)
         Broadcaster.broadcast!(@record) if cleared
         cleared
       end

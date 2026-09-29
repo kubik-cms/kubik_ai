@@ -53,3 +53,18 @@
     color: var(--kubik-interface-color-grey-700, #5e6469);
   }
 }
+
+// Metatag AI retry instructions (matches kubik-panel-cta prompt chrome from interface_elements).
+.kubik-panel-cta__prompt-textarea {
+  display: block;
+  min-height: 4.5rem;
+  max-height: 9rem;
+  overflow-y: auto;
+  resize: none;
+  line-height: 1.45;
+  field-sizing: content;
+
+  @supports not (field-sizing: content) {
+    height: auto;
+  }
+}

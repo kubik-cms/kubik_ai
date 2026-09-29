@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateKubikAiConfigurations < ActiveRecord::Migration<%= migration_version %>
   def change
     return if table_exists?(:kubik_ai_configurations)
@@ -6,6 +8,7 @@ class CreateKubikAiConfigurations < ActiveRecord::Migration<%= migration_version
       t.boolean :enabled, null: false, default: false
       t.string :vision_model
       t.text :site_context
+      t.jsonb :context_instructions, null: false, default: {}
       t.jsonb :feature_flags, null: false, default: {}
       t.integer :spend_cap_cents
       t.string :spend_period, null: false, default: "monthly"

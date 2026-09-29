@@ -14,9 +14,22 @@ For local development, use `path: "vendor/kubik_ai"` or a devcontainer mount.
 
 ```bash
 bundle install
-bin/rails kubik:ai:install
+bin/rails kubik:ai:install   # or: bin/rails generate kubik:ai:install
 bin/rails db:migrate
 ```
+
+### Upgrading
+
+New database changes ship as generator templates in the gem (not hand-written in host apps). After updating `kubik_ai`:
+
+```bash
+bin/rails kubik:ai:upgrade   # or: bin/rails generate kubik:ai:upgrade
+bin/rails db:migrate
+```
+
+`kubik:ai:upgrade` is idempotent: it skips migrations when the schema is already up to date.
+
+Fresh installs only need `kubik:ai:install` (the configurations table includes `context_instructions`).
 
 ### Active Record encryption
 
@@ -33,7 +46,11 @@ The booking app sets development/test keys in `config/application.rb` so local a
 - **env** (default): set `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, or `GEMINI_API_KEY`.
 - **database**: set credential source in Admin → AI → Providers.
 
-## Context providers
+## AI instructions (Admin → Website → AI)
+
+- **Site context** — included on every AI run (brand, audience, tone).
+- **Media / SEO / Social** — feature-specific instructions (like ChatGPT custom instructions), compiled only when that feature runs (image analysis, meta SEO panels, social panels).
+- Per-run **optional instructions** on meta tag retries are still supported in the editor UI.
 
 Register additional context from an initializer:
 
@@ -51,7 +68,17 @@ When `kubik_media_library` is present, images enqueue analysis when they reach t
 
 ## Meta tags (pages, trips, news, etc.)
 
-On edit screens for metataggable resources, the **robot icon in the Meta tab header** opens the same style of offcanvas: queue AI suggestions (Turbo broadcasts + panel polling while processing), review fields, then apply or discard. Applying updates the Meta tab fields on the main form via `kubik-ai-metatag-sync`.
+On edit screens for metataggable resources, the **robot icon in the Meta tab header** opens the same style of offcanvas: queue AI suggestions (Turbo broadcasts while processing), review fields, then apply or discard. Applying updates the Meta tab fields on the main form via `kubik-ai-metatag-sync`.
+
+Focus-scoped panels (`seo`, `meta_description`, `social`, etc.) use separate runtime state and DOM ids per focus. Stale `queued`/`processing` UI is cleared automatically after `KUBIK_AI_METATAG_STALE_SECONDS` (default 10).
+
+Host apps that rely on Turbo broadcasts only (no HTTP panel poller) should set:
+
+```ruby
+KubikAi.configure do |config|
+  config.metatag_broadcast_only = true
+end
+```
 
 **Previous suggestions** (`additional_info.kubik_ai.history`) lists alt/tags (and optional editor prompt) for suggestions you **applied** to the media record. Reinterpret-only runs and discarded suggestions are not listed. Optional text in the blue CTA is sent to the model on reinterpret and stored on the history row when you apply.
 

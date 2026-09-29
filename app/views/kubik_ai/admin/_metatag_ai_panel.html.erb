@@ -1,8 +1,9 @@
+<% focus = local_assigns[:focus] %>
 <%= kubik_panel_shell(
       html_class: "kubik-ai-panel",
-      id: KubikAi::Metatag::PanelDom.panel_id(metatagable)
+      id: KubikAi::Metatag::PanelDom.panel_id(metatagable, focus: focus)
     ) do %>
-  <%= render partial: "kubik_ai/admin/metatag_ai_cta", locals: { metatagable: metatagable } %>
-  <%= render partial: "kubik_ai/admin/metatag_ai_results", locals: { metatagable: metatagable } %>
+  <%= render partial: "kubik_ai/admin/metatag_ai_cta", locals: { metatagable: metatagable, focus: focus } %>
+  <%= render partial: "kubik_ai/admin/metatag_ai_results", locals: { metatagable: metatagable, focus: focus } %>
   <div id="<%= KubikAi::Metatag::PanelDom.form_sync_id(metatagable) %>" class="kubik-ai-panel__metatag-sync" hidden aria-hidden="true"></div>
 <% end %>

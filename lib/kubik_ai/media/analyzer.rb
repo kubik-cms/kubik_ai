@@ -21,7 +21,7 @@ module KubikAi
         @upload.reload
         kubik_ai_state = @upload.additional_info.fetch("kubik_ai", {})
         reinterpret_prompt = kubik_ai_state["current_reinterpret_prompt"].presence if @operation == :reinterpret
-        context = KubikAi::Context::Compiler.compile
+        context = KubikAi::Context::Compiler.compile(scopes: [:media])
         media_state = @operation == :reinterpret ? KubikAi::Media::ReinterpretPrompt.media_state_for(@upload) : nil
         instructions = KubikAi::Media::ReinterpretPrompt.append_to_instructions(
           context,

@@ -1,5 +1,6 @@
-<% runtime = KubikAi::Metatag::RuntimeState.fetch(metatagable) %>
-<% pending = KubikAi::Metatag::SuggestionStore.fetch(metatagable).present? %>
+<% focus = local_assigns[:focus] %>
+<% runtime = KubikAi::Metatag::RuntimeState.fetch(metatagable, focus: focus) %>
+<% pending = KubikAi::Metatag::SuggestionStore.fetch(metatagable, focus: focus).present? %>
 <% status = runtime["status"].presence || "idle" %>
 <% processing = %w[queued processing].include?(status) %>
 <% failed = status == "failed" %>
@@ -35,21 +36,53 @@
   <% end %>
 <% end %>
 
+<% cta_lead = case focus
+   when "seo_title"
+     "AI can suggest a search-friendly title tag from this article’s content. Nothing is saved until you apply your choice."
+   when "meta_description"
+     "AI can suggest a meta description for search results. Nothing is saved until you apply your choice."
+   when "social"
+     "AI can suggest Open Graph and Twitter card text from this article’s content. Nothing is saved until you apply your choices."
+   else
+     "AI can suggest SEO and social meta tags from this page’s content. Nothing is saved until you apply your choices."
+   end %>
+
+<% submit_label = case focus
+   when "seo_title"
+     try_again ? "Try again" : "Suggest title with AI"
+   when "meta_description"
+     try_again ? "Try again" : "Suggest description with AI"
+   when "social"
+     try_again ? "Try again" : "Suggest social tags with AI"
+   else
+     try_again ? "Try again" : "Suggest meta tags with AI"
+   end %>
+
 <%= kubik_panel_cta(
-      lead: "AI can suggest SEO and social meta tags from this page’s content. Nothing is saved until you apply your choices.",
+      lead: cta_lead,
       tone: "brand",
       modifier: cta_modifier,
-      aria_label: "AI meta assistant",
+      aria_label: KubikAi::Metatag::Focus.trigger_label(focus),
       status: status_markup
     ) do %>
   <% unless processing %>
-    <%= form_with url: KubikAi::Metatag::Paths.suggest_path(metatagable),
+    <%= form_with url: KubikAi::Metatag::Paths.suggest_path(metatagable, focus: focus),
                   method: :post,
                   data: { turbo: true, turbo_stream: true },
                   html: { class: "kubik-panel-cta__form" } do %>
+      <% if try_again %>
+        <div class="kubik-panel-cta__prompt">
+          <%= label_tag :kubik_ai_instructions, "Optional instructions for the AI", class: "kubik-panel-cta__prompt-label" %>
+          <p class="kubik-panel-cta__prompt-hint">Add guidance for this run only. Leave blank to use the page content alone.</p>
+          <%= text_area_tag :kubik_ai_instructions,
+                            params[:kubik_ai_instructions],
+                            rows: 3,
+                            class: "kubik-panel-cta__prompt-input kubik-panel-cta__prompt-textarea",
+                            placeholder: "e.g. mention the event date, keep tone formal, emphasise ferry routes…" %>
+        </div>
+      <% end %>
       <div class="kubik-panel-cta__actions">
-        <%= submit_tag(try_again ? "Try again" : "Suggest meta tags with AI",
-                       class: "button kubik-panel-cta__button") %>
+        <%= submit_tag(submit_label, class: "button kubik-panel-cta__button") %>
       </div>
     <% end %>
   <% end %>

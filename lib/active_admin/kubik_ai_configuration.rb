@@ -14,6 +14,7 @@ ActiveAdmin.register Kubik::AiConfiguration do
                 :spend_period,
                 :credential_source,
                 *Kubik::AiConfiguration::FEATURE_FLAG_KEYS,
+                *Kubik::AiConfiguration::CONTEXT_INSTRUCTION_KEYS.map { |key| "context_#{key}" },
                 provider_credentials: %i[openai_api_key anthropic_api_key gemini_api_key]
 
   controller do
@@ -68,6 +69,17 @@ ActiveAdmin.register Kubik::AiConfiguration do
         end
       end
 
+      tab "AI instructions" do
+        attributes_table_for resource do
+          row :site_context
+          Kubik::AiConfiguration::CONTEXT_INSTRUCTION_KEYS.each do |key|
+            row KubikAi::Context::Scopes.heading(key) do
+              simple_format resource.context_instructions[key]
+            end
+          end
+        end
+      end
+
       tab "Features" do
         attributes_table_for resource do
           resource.feature_flags.each do |key, value|
@@ -106,11 +118,22 @@ ActiveAdmin.register Kubik::AiConfiguration do
         f.inputs do
           f.input :enabled
           f.input :vision_model, hint: "RubyLLM model id (e.g. gemini-2.0-flash, gpt-4o)"
-          f.input :site_context, as: :text, input_html: { rows: 8 },
-                                hint: "Describe the site, audience, and how images should be interpreted."
+          f.input :site_context, as: :text, input_html: { rows: 6 },
+                                hint: "Overall site context for every AI run (brand, audience, tone)."
           f.input :credential_source,
                   as: :select,
                   collection: Kubik::AiConfiguration::CREDENTIAL_SOURCES
+        end
+      end
+
+      tab "AI instructions" do
+        f.inputs "Feature-specific guidance (like ChatGPT custom instructions)" do
+          f.input :context_media, as: :text, input_html: { rows: 6 },
+                                  hint: "Sent when analysing images: alt text style, subjects to mention, tags to prefer or avoid."
+          f.input :context_seo, as: :text, input_html: { rows: 6 },
+                                 hint: "Sent for SEO meta suggestions: priority keywords, locations, services, title/description patterns."
+          f.input :context_social, as: :text, input_html: { rows: 6 },
+                                   hint: "Sent for Open Graph / Twitter suggestions: hook style, emoji policy, hashtags, campaign names."
         end
       end
 

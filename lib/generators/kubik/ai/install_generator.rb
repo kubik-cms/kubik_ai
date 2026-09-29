@@ -19,6 +19,11 @@ module Kubik
                              migration_version: migration_version
         end
 
+        def install_notice
+          say "After updating kubik_ai, run: bin/rails generate kubik:ai:upgrade", :green
+          say "Then: bin/rails db:migrate", :green
+        end
+
         def copy_initializer
           template "kubik_ai.rb.erb", "config/initializers/kubik_ai.rb"
         end

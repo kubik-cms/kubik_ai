@@ -6,7 +6,9 @@ module KubikAi
                   :active_admin_blocks,
                   :default_vision_model,
                   :default_text_model,
-                  :prompt_version
+                  :prompt_version,
+                  :plain_text_from_wysiwyg,
+                  :metatag_broadcast_only
 
     def initialize
       @context_providers = {}
@@ -16,6 +18,7 @@ module KubikAi
       @default_vision_model = "gemini-2.0-flash"
       @default_text_model = "gemini-2.0-flash"
       @prompt_version = "media_analyze_v1"
+      @metatag_broadcast_only = false
     end
 
     def suggestion_sets

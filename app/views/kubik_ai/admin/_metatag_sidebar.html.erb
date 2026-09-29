@@ -1,7 +1,8 @@
-<% panel_sync_attrs = KubikAi::Metatag::PanelSyncAttributes.for(metatagable) %>
+<% focus = local_assigns[:focus] %>
+<% panel_sync_attrs = KubikAi::Metatag::PanelSyncAttributes.for(metatagable, focus: focus) %>
 
 <%= turbo_stream_from metatagable, :kubik_ai_metatag %>
 
-<%= turbo_frame_tag KubikAi::Metatag::PanelDom.frame_id(metatagable), data: panel_sync_attrs do %>
-  <%= render partial: "kubik_ai/admin/metatag_ai_panel", locals: { metatagable: metatagable } %>
+<%= turbo_frame_tag KubikAi::Metatag::PanelDom.frame_id(metatagable, focus: focus), data: panel_sync_attrs do %>
+  <%= render partial: "kubik_ai/admin/metatag_ai_panel", locals: { metatagable: metatagable, focus: focus } %>
 <% end %>

@@ -1,0 +1,10 @@
+# frozen_string_literal: true
+
+class AddContextInstructionsToKubikAiConfigurations < ActiveRecord::Migration<%= migration_version %>
+  def change
+    return unless table_exists?(:kubik_ai_configurations)
+    return if column_exists?(:kubik_ai_configurations, :context_instructions)
+
+    add_column :kubik_ai_configurations, :context_instructions, :jsonb, null: false, default: {}
+  end
+end

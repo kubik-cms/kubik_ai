@@ -1,34 +1,46 @@
-<% runtime = KubikAi::Metatag::RuntimeState.fetch(metatagable) %>
-<% status = runtime["status"].presence || "idle" %>
-<% ai_processing = %w[queued processing].include?(status) %>
-<% panel_sync_attrs = KubikAi::Metatag::PanelSyncAttributes.for(metatagable) %>
+<% focus = local_assigns[:focus] %>
+<% sync_panel = local_assigns.fetch(:sync_panel, true) %>
 <% attach_frame_sync = local_assigns.fetch(:attach_frame_sync, false) %>
-<% frame_id = KubikAi::Metatag::PanelDom.frame_id(metatagable) %>
-<% panel_id = KubikAi::Metatag::PanelDom.panel_id(metatagable) %>
+<% panel_focuses = focus.present? ? [focus] : (KubikAi::Metatag::Focus.all + [nil]).uniq %>
 
-<% if ai_processing %>
-  <% if attach_frame_sync %>
-    <%= turbo_stream.replace frame_id do %>
-      <%= turbo_frame_tag frame_id, data: panel_sync_attrs do %>
-        <%= render partial: "kubik_ai/admin/metatag_ai_panel", locals: { metatagable: metatagable } %>
+<% if sync_panel %>
+  <% panel_focuses.each do |panel_focus| %>
+    <% runtime = KubikAi::Metatag::RuntimeState.fetch(metatagable, focus: panel_focus) %>
+    <% status = runtime["status"].presence || "idle" %>
+    <% ai_processing = %w[queued processing].include?(status) %>
+    <% panel_sync_attrs = KubikAi::Metatag::PanelSyncAttributes.for(metatagable, focus: panel_focus) %>
+    <% frame_id = KubikAi::Metatag::PanelDom.frame_id(metatagable, focus: panel_focus) %>
+    <% panel_id = KubikAi::Metatag::PanelDom.panel_id(metatagable, focus: panel_focus) %>
+
+    <% if ai_processing %>
+      <% if attach_frame_sync %>
+        <%= turbo_stream.replace frame_id do %>
+          <%= turbo_frame_tag frame_id, data: panel_sync_attrs do %>
+            <%= render partial: "kubik_ai/admin/metatag_ai_panel", locals: { metatagable: metatagable, focus: panel_focus } %>
+          <% end %>
+        <% end %>
+      <% else %>
+        <%= turbo_stream.replace panel_id do %>
+          <%= render partial: "kubik_ai/admin/metatag_ai_panel", locals: { metatagable: metatagable, focus: panel_focus } %>
+        <% end %>
       <% end %>
-    <% end %>
-  <% else %>
-    <%= turbo_stream.replace panel_id do %>
-      <%= render partial: "kubik_ai/admin/metatag_ai_panel", locals: { metatagable: metatagable } %>
-    <% end %>
-  <% end %>
-<% else %>
-  <%= turbo_stream.replace frame_id do %>
-    <%= turbo_frame_tag frame_id do %>
-      <%= render partial: "kubik_ai/admin/metatag_ai_panel", locals: { metatagable: metatagable } %>
+    <% else %>
+      <%= turbo_stream.replace frame_id do %>
+        <%= turbo_frame_tag frame_id, data: panel_sync_attrs do %>
+          <%= render partial: "kubik_ai/admin/metatag_ai_panel", locals: { metatagable: metatagable, focus: panel_focus } %>
+        <% end %>
+      <% end %>
     <% end %>
   <% end %>
 <% end %>
 
-<%= turbo_stream.replace KubikAi::Metatag::PanelDom.trigger_id(metatagable) do %>
-  <%= turbo_frame_tag KubikAi::Metatag::PanelDom.trigger_id(metatagable) do %>
-    <%= render partial: "kubik_ai/admin/metatag_trigger_content", locals: { metatagable: metatagable } %>
+<% if local_assigns.fetch(:sync_triggers, true) %>
+  <% (KubikAi::Metatag::Focus.all + [nil]).uniq.each do |trigger_focus| %>
+    <%= turbo_stream.replace KubikAi::Metatag::PanelDom.trigger_id(metatagable, focus: trigger_focus) do %>
+      <%= turbo_frame_tag KubikAi::Metatag::PanelDom.trigger_id(metatagable, focus: trigger_focus) do %>
+        <%= render partial: "kubik_ai/admin/metatag_trigger_content", locals: { metatagable: metatagable, focus: trigger_focus } %>
+      <% end %>
+    <% end %>
   <% end %>
 <% end %>
 

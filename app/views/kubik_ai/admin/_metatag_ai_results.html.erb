@@ -1,15 +1,16 @@
-<% pending = KubikAi::Metatag::SuggestionStore.fetch(metatagable) %>
+<% focus = local_assigns[:focus] %>
+<% pending = KubikAi::Metatag::SuggestionStore.fetch(metatagable, focus: focus) %>
 <% return unless pending.present? %>
 
 <% tag = metatagable.meta_tag %>
 <% previous = KubikAi::Metatag::PendingApplier::META_FIELDS.index_with { |field| tag&.public_send(field) } %>
-<% suggestion_set = KubikAi.config.suggestion_sets.fetch(:metatag, KubikAi::Suggestions::MetatagSet).for(metatagable) %>
+<% suggestion_set = KubikAi.config.suggestion_sets.fetch(:metatag, KubikAi::Suggestions::MetatagSet).for(metatagable, focus: focus) %>
 
 <%= kubik_panel_widget(
       title: "Review meta suggestions",
       title_modifier: "kubik-panel-widget__title--emphasized"
     ) do %>
-  <%= form_with url: KubikAi::Metatag::Paths.apply_path(metatagable),
+  <%= form_with url: KubikAi::Metatag::Paths.apply_path(metatagable, focus: focus),
                 method: :post,
                 data: { turbo: true, turbo_stream: true },
                 html: { class: kubik_panel_form_html_class } do %>
@@ -24,7 +25,7 @@
     <div class="kubik-action-row">
       <%= button_tag "Apply changes", type: "submit", class: "button button--compact" %>
       <%= link_to "Discard",
-                  KubikAi::Metatag::Paths.discard_path(metatagable),
+                  KubikAi::Metatag::Paths.discard_path(metatagable, focus: focus),
                   class: "kubik-link-button kubik-link-button--discard",
                   data: { turbo_method: :post, turbo_stream: true } %>
     </div>
