@@ -6,9 +6,9 @@ module KubikAi
     def kubik_ai_metatag_form_actions(metatagable, focus = nil)
       return unless defined?(KubikAi::ActiveAdmin::MetatagActions)
       return if metatagable.new_record?
-      return unless defined?(Kubik::AiConfiguration) &&
-                    Kubik::AiConfiguration.cached.enabled? &&
-                    Kubik::AiConfiguration.cached.meta_tag_suggestions
+      return unless defined?(Kubik::AiConfiguration) && Kubik::AiConfiguration.cached.enabled?
+      return unless KubikAi::ResourceSettings.value_for_record(metatagable, :meta_tag_suggestions)
+      return unless KubikAi::Metatag::Paths.panel_path_available?(metatagable)
 
       render partial: "kubik_ai/admin/metatag_trigger",
              locals: {

@@ -3,12 +3,13 @@
 module KubikAi
   module Context
     class Compiler
-      def self.compile(scopes: nil)
-        new(scopes: scopes).compile
+      def self.compile(scopes: nil, resource: nil)
+        new(scopes: scopes, resource: resource).compile
       end
 
-      def initialize(scopes: nil)
+      def initialize(scopes: nil, resource: nil)
         @scopes = KubikAi::Context::Scopes.normalize_list(scopes)
+        @resource = resource
       end
 
       def compile
@@ -30,6 +31,10 @@ module KubikAi
 
       def feature_instruction_sections
         return [] if @scopes.empty?
+
+        if @resource.present?
+          return KubikAi::ResourceSettings.context_for_scopes(@resource, @scopes)
+        end
 
         config = Kubik::AiConfiguration.instance
         instructions = config.context_instructions.with_indifferent_access

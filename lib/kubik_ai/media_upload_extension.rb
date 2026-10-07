@@ -17,8 +17,7 @@ module KubikAi
       config = Kubik::AiConfiguration.instance
       return false unless config.enabled?
 
-      flags = config.feature_flags.with_indifferent_access
-      flags.fetch(:auto_analyze_on_upload, true)
+      KubikAi::ResourceSettings.media_value(:auto_analyze_on_upload)
     rescue StandardError
       false
     end

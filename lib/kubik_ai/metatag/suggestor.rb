@@ -44,14 +44,15 @@ module KubikAi
       def ensure_enabled!
         config = Kubik::AiConfiguration.instance
         raise KubikAi::FeatureDisabled, "AI is disabled" unless config.enabled
-        unless config.meta_tag_suggestions
+        unless KubikAi::ResourceSettings.value_for_record(@metatagable, :meta_tag_suggestions)
           raise KubikAi::FeatureDisabled, "Meta tag suggestions are disabled"
         end
       end
 
       def compile_context
         scopes = KubikAi::Context::Scopes.for_metatag_focus(@focus)
-        site_context = KubikAi::Context::Compiler.compile(scopes: scopes)
+        resource_key = KubikAi::ResourceSettings.resource_key_for(@metatagable)
+        site_context = KubikAi::Context::Compiler.compile(scopes: scopes, resource: resource_key)
         content_provider = KubikAi::Context::Providers::MetatagableContent.new(metatagable: @metatagable)
         content_section = if content_provider.available?
                             "## #{content_provider.heading}\n#{content_provider.to_prompt}"

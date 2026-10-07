@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 # Loaded via ActiveAdmin load_paths (see KubikAi::Engine) so controllers reload in development.
+MEDIA_RESOURCE_AI_KEYS = %i[
+  auto_analyze_on_upload auto_apply_alt_text auto_apply_tags prefer_no_faces tag_vocabulary_hints
+].freeze
+
 ActiveAdmin.register Kubik::AiConfiguration do
   menu_options = KubikAi.config.active_admin_menu || {}
   menu(**menu_options) if menu_options.present?
@@ -73,9 +77,16 @@ ActiveAdmin.register Kubik::AiConfiguration do
         attributes_table_for resource do
           row :site_context
           Kubik::AiConfiguration::CONTEXT_INSTRUCTION_KEYS.each do |key|
+            next if key == :media
+
             row KubikAi::Context::Scopes.heading(key) do
               simple_format resource.context_instructions[key]
             end
+          end
+        end
+        if defined?(KubikSettings::ResourceResolver) && KubikSettings::ResourceResolver.registered?(:media)
+          panel "Media library" do
+            para link_to("Configure media AI under Media → Settings", KubikSettings::ResourceResolver.edit_path(:media))
           end
         end
       end
@@ -83,6 +94,8 @@ ActiveAdmin.register Kubik::AiConfiguration do
       tab "Features" do
         attributes_table_for resource do
           resource.feature_flags.each do |key, value|
+            next if MEDIA_RESOURCE_AI_KEYS.include?(key.to_sym)
+
             row key.to_s.humanize do
               value
             end
@@ -128,24 +141,26 @@ ActiveAdmin.register Kubik::AiConfiguration do
 
       tab "AI instructions" do
         f.inputs "Feature-specific guidance (like ChatGPT custom instructions)" do
-          f.input :context_media, as: :text, input_html: { rows: 6 },
-                                  hint: "Sent when analysing images: alt text style, subjects to mention, tags to prefer or avoid."
           f.input :context_seo, as: :text, input_html: { rows: 6 },
-                                 hint: "Sent for SEO meta suggestions: priority keywords, locations, services, title/description patterns."
+                                 hint: "Default SEO instructions; Pages and News can override under their index → Settings."
           f.input :context_social, as: :text, input_html: { rows: 6 },
-                                   hint: "Sent for Open Graph / Twitter suggestions: hook style, emoji policy, hashtags, campaign names."
+                                   hint: "Default social instructions; content types can override in their Settings."
+        end
+        if defined?(KubikSettings::ResourceResolver) && KubikSettings::ResourceResolver.registered?(:media)
+          para link_to("Media library AI (upload, alt text, tags): Media → Settings",
+                       KubikSettings::ResourceResolver.edit_path(:media))
         end
       end
 
       tab "Features" do
         f.inputs do
-          f.input :auto_analyze_on_upload, as: :boolean
-          f.input :auto_apply_alt_text, as: :boolean
-          f.input :auto_apply_tags, as: :boolean
-          f.input :meta_tag_suggestions, as: :boolean
+          f.input :meta_tag_suggestions, as: :boolean,
+                                         hint: "Per content-type overrides: Pages / News → Settings."
           f.input :seo_keyword_emphasis, as: :boolean
-          f.input :prefer_no_faces, as: :boolean
-          f.input :tag_vocabulary_hints, as: :string
+        end
+        if defined?(KubikSettings::ResourceResolver) && KubikSettings::ResourceResolver.registered?(:media)
+          para link_to("Media upload AI features: Media → Settings",
+                       KubikSettings::ResourceResolver.edit_path(:media))
         end
       end
 

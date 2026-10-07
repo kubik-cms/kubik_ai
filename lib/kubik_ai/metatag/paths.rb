@@ -6,7 +6,16 @@ module KubikAi
       module_function
 
       def panel_path(record, focus: nil)
-        route_helper(record, "kubik_ai_metatag_panel_admin_#{singular_route_key(record)}_path", focus: focus)
+        helper_name = panel_route_helper_name(record)
+        route_helper(record, helper_name, focus: focus)
+      end
+
+      def panel_path_available?(record)
+        ::Rails.application.routes.url_helpers.respond_to?(panel_route_helper_name(record))
+      end
+
+      def panel_route_helper_name(record)
+        "kubik_ai_metatag_panel_admin_#{singular_route_key(record)}_path"
       end
 
       def sync_path(record, focus: nil)
@@ -30,7 +39,10 @@ module KubikAi
       end
 
       def route_helper(record, helper_name, focus: nil)
-        path = ::Rails.application.routes.url_helpers.public_send(helper_name, record, only_path: true)
+        helpers = ::Rails.application.routes.url_helpers
+        return unless helpers.respond_to?(helper_name)
+
+        path = helpers.public_send(helper_name, record, only_path: true)
         return path if focus.blank?
 
         query = ::Rack::Utils.build_query(focus: focus)

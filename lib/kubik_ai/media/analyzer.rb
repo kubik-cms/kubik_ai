@@ -21,7 +21,7 @@ module KubikAi
         @upload.reload
         kubik_ai_state = @upload.additional_info.fetch("kubik_ai", {})
         reinterpret_prompt = kubik_ai_state["current_reinterpret_prompt"].presence if @operation == :reinterpret
-        context = KubikAi::Context::Compiler.compile(scopes: [:media])
+        context = KubikAi::Context::Compiler.compile(scopes: [:media], resource: :media)
         media_state = @operation == :reinterpret ? KubikAi::Media::ReinterpretPrompt.media_state_for(@upload) : nil
         instructions = KubikAi::Media::ReinterpretPrompt.append_to_instructions(
           context,
@@ -65,7 +65,7 @@ module KubikAi
       end
 
       def apply_result!(result)
-        flags = Kubik::AiConfiguration.instance.feature_flags.with_indifferent_access
+        flags = media_feature_flags
         info = @upload.additional_info.deep_dup
         kubik_ai = (info["kubik_ai"] || {}).deep_dup
 
@@ -132,6 +132,13 @@ module KubikAi
 
       def strip_html(text)
         text.to_s.gsub(/<[^>]*>/, " ").squish
+      end
+
+      def media_feature_flags
+        {
+          auto_apply_alt_text: KubikAi::ResourceSettings.media_value(:auto_apply_alt_text),
+          auto_apply_tags: KubikAi::ResourceSettings.media_value(:auto_apply_tags)
+        }.with_indifferent_access
       end
     end
   end
