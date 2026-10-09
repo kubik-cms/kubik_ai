@@ -38,6 +38,23 @@ module KubikAi
                      locals: { upload: resource }
             end
 
+            member_action :kubik_ai_restart, method: :post do
+              restarted = KubikAi::Media::RestartAnalysis.call!(
+                resource,
+                operation: params[:operation]
+              )
+              unless restarted
+                head :unprocessable_entity
+                return
+              end
+
+              resource.reload
+
+              render template: "kubik_ai/admin/media_upload_restart",
+                     formats: [:turbo_stream],
+                     locals: { upload: resource }
+            end
+
             member_action :kubik_ai_reinterpret, method: :post do
               prompt = params.dig(:kubik_ai, :additional_prompt).to_s.strip
               KubikAi::Media::ReinterpretPrompt.store!(resource, prompt)

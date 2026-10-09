@@ -86,7 +86,7 @@ module KubikAi
         KubikAi::Llm::CredentialResolver.apply!(config: config)
 
         model = config.vision_model.presence || KubikAi.config.default_vision_model
-        prompt = build_prompt(instructions, operation: operation)
+        prompt = build_prompt(instructions, operation: operation, config: config)
 
         response = RubyLLM.chat(model: model).ask(prompt, with: image_path)
         parsed = parse_json_response(response.content.to_s)
@@ -117,23 +117,32 @@ module KubikAi
 
       private
 
-      def build_prompt(instructions, operation:)
+      def build_prompt(instructions, operation:, config:)
         reinterpret = operation.to_s == "media_reinterpret"
         task = if reinterpret
                  "Re-suggest alt text and tags for this image. When editor additional instructions are present, treat them as mandatory."
                else
                  "Suggest alt text and tags for this image."
                end
+        max_tags = KubikAi::Media::TagList.ai_max_tags
+        vocabulary = config.tag_vocabulary_hints.to_s.strip
+        vocabulary_line = vocabulary.present? ? "Preferred tag vocabulary: #{vocabulary}\n" : ""
 
         <<~PROMPT
           You analyze images for a content management system. #{task} Use the site context below.
 
           #{instructions}
 
+          Tag rules:
+          - Return at most #{max_tags} tags in the "tags" array.
+          - Each JSON array element is one complete tag. Keep multi-word names in a single element (e.g. "loch ness", not "loch" and "ness").
+          - Use short, specific library labels that help editors find this image later.
+          - Do not use filler or negative words (e.g. "no", "none", "faces") or vague tags that do not describe the image subject.
+          #{vocabulary_line}
           Respond with JSON only, no markdown fences:
           {
             "alt_text": "concise accessible alt text, plain text, max 125 characters",
-            "tags": ["separate", "tags", "one", "per", "array", "item"],
+            "tags": ["loch ness", "highland", "sunset"],
             "notes": "optional brief rationale for administrators"
           }
         PROMPT
@@ -151,7 +160,7 @@ module KubikAi
         data = parse_generic_json(content)
         {
           alt_text: data["alt_text"].to_s.strip,
-          tags: KubikAi::Media::TagList.normalize(data["tags"]),
+          tags: KubikAi::Media::TagList.normalize_ai_tags(data["tags"]),
           notes: data["notes"].to_s.strip
         }
       rescue JSON::ParserError => e

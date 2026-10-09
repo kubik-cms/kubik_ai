@@ -1,0 +1,5 @@
+<%= button_to "Restart analysis",
+              kubik_ai_restart_admin_kubik_media_upload_path(upload),
+              method: :post,
+              form: { data: { turbo: true, turbo_stream: true }, class: "kubik-panel-cta__restart-form" },
+              class: "button kubik-panel-cta__button kubik-panel-cta__button--secondary" %>

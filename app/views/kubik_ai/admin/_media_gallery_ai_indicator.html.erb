@@ -1,0 +1,10 @@
+<span class="kubik-ai-gallery-indicator"
+      role="status"
+      aria-live="polite"
+      title="<%= KubikAi::Media::GalleryIndicator.status_message(upload) %>"
+      aria-label="<%= KubikAi::Media::GalleryIndicator.status_message(upload) %>">
+  <span class="material-symbols-outlined material-icon kubik-ai-gallery-indicator__icon" aria-hidden="true">smart_toy</span>
+</span>
+<% if KubikAi::Media::GalleryIndicator.can_restart?(upload) %>
+  <%= render "kubik_ai/admin/media_gallery_ai_restart", upload: upload %>
+<% end %>

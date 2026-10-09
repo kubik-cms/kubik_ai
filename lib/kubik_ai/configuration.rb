@@ -8,7 +8,9 @@ module KubikAi
                   :default_text_model,
                   :prompt_version,
                   :plain_text_from_wysiwyg,
-                  :metatag_broadcast_only
+                  :metatag_broadcast_only,
+                  :prefer_no_faces,
+                  :active_job_queue
 
     def initialize
       @context_providers = {}
@@ -19,6 +21,8 @@ module KubikAi
       @default_text_model = "gemini-2.0-flash"
       @prompt_version = "media_analyze_v1"
       @metatag_broadcast_only = false
+      @prefer_no_faces = true
+      @active_job_queue = :ai
     end
 
     def suggestion_sets

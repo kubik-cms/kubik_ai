@@ -12,6 +12,8 @@ module KubikAi
         upload = upload.is_a?(Kubik::MediaUpload) ? upload : Kubik::MediaUpload.find_by(id: upload)
         return unless upload
 
+        MissedAnalysis.enqueue_if_eligible!(upload) if context == :full
+
         kubik_ai = upload.additional_info.fetch("kubik_ai", {})
         status = kubik_ai["status"].presence
         return unless %w[queued processing].include?(status)
@@ -34,6 +36,10 @@ module KubikAi
         return if requeued_at && requeued_at > QUEUED_STALE_AFTER.ago
 
         operation = kubik_ai["operation"].presence || "analyze"
+        if operation == "analyze" && !KubikAi::ResourceSettings.media_value(:auto_analyze_on_upload)
+          return
+        end
+
         ::Rails.logger.info(
           "[KubikAi] Re-enqueueing stale queued analysis for MediaUpload #{upload.id} (#{operation})"
         )
@@ -47,7 +53,7 @@ module KubikAi
         ::Rails.logger.warn("[KubikAi] Marking stale processing as failed for MediaUpload #{upload.id}")
         Status.fail!(
           upload,
-          message: "AI analysis timed out or was interrupted. Use Reinterpret with AI to try again."
+          message: "AI analysis timed out or was interrupted. Use Restart analysis or Reinterpret with AI to try again."
         )
       end
 

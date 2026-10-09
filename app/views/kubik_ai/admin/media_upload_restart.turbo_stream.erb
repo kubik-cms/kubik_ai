@@ -1,0 +1,9 @@
+<% if defined?(KubikMediaLibrary::GalleryBroadcaster) %>
+  <%= render template: "admin/kubik_media_uploads/gallery_item_sync",
+             formats: [:turbo_stream],
+             locals: { upload: upload, event: :update, modal: false } %>
+<% end %>
+
+<%= render template: "kubik_ai/admin/media_upload_sync",
+           formats: [:turbo_stream],
+           locals: { upload: upload, attach_frame_sync: true } %>

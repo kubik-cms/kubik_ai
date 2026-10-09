@@ -16,9 +16,8 @@ module KubikAi
         return unless turbo_available?
 
         content = SyncStream.render(@upload)
-        return if content.blank?
-
-        Turbo::StreamsChannel.broadcast_stream_to(stream_name, content: content)
+        Turbo::StreamsChannel.broadcast_stream_to(stream_name, content: content) if content.present?
+        broadcast_gallery_index!(@upload)
       rescue StandardError => e
         ::Rails.logger.error("[KubikAi] Turbo broadcast failed for MediaUpload #{@upload.id}: #{e.message}")
       end
@@ -31,6 +30,14 @@ module KubikAi
 
       def turbo_available?
         defined?(Turbo::StreamsChannel)
+      end
+
+      def broadcast_gallery_index!(upload)
+        return unless defined?(KubikMediaLibrary::GalleryBroadcaster)
+
+        KubikMediaLibrary::GalleryBroadcaster.broadcast!(upload)
+      rescue StandardError => e
+        ::Rails.logger.warn("[KubikAi] Gallery index broadcast failed for MediaUpload #{upload.id}: #{e.message}")
       end
     end
   end

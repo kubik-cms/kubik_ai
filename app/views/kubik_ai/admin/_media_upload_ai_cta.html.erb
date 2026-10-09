@@ -21,6 +21,11 @@
         <% if kubik_ai["operation"].present? %>
           <p><small>Operation: <%= kubik_ai["operation"] %></small></p>
         <% end %>
+        <% if KubikAi::Media::RestartAnalysis.restartable?(upload) %>
+          <div class="kubik-panel-cta__status-actions">
+            <%= render "kubik_ai/admin/media_upload_ai_restart_button", upload: upload %>
+          </div>
+        <% end %>
       </div>
     </div>
   <% end %>
@@ -29,6 +34,11 @@
     <div class="kubik-panel-cta__status" role="alert">
       <p><strong>AI failed</strong></p>
       <p><%= kubik_ai["status_message"] %></p>
+      <% if KubikAi::Media::RestartAnalysis.restartable?(upload) %>
+        <div class="kubik-panel-cta__status-actions">
+          <%= render "kubik_ai/admin/media_upload_ai_restart_button", upload: upload %>
+        </div>
+      <% end %>
     </div>
   <% end %>
 <% elsif status == "completed" && kubik_ai["status_message"].present? && !pending %>

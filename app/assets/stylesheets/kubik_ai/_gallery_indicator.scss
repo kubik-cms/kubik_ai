@@ -1,0 +1,55 @@
+.kubik-ai-gallery-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  position: relative;
+  z-index: 2;
+  color: var(--kubik-interface-color-brand-500, #6366f1);
+  line-height: 1;
+
+  &__restart-form {
+    display: inline-flex;
+    margin: 0;
+  }
+
+  &__restart {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--kubik-interface-color-grey-600, #4b5563);
+    cursor: pointer;
+    line-height: 1;
+
+    .material-icon {
+      font-size: 0.95rem;
+    }
+
+    &:hover,
+    &:focus-visible {
+      color: var(--kubik-interface-color-brand-500, #6366f1);
+    }
+  }
+
+  &__icon {
+    font-size: 1rem;
+    filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.55));
+    animation: kubik-ai-gallery-indicator-glow 1.6s ease-in-out infinite;
+  }
+}
+
+@keyframes kubik-ai-gallery-indicator-glow {
+  0%,
+  100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 3px rgba(99, 102, 241, 0.45));
+  }
+
+  50% {
+    opacity: 0.85;
+    filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.75));
+  }
+}

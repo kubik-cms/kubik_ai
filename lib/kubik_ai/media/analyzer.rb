@@ -76,7 +76,7 @@ module KubikAi
           kubik_ai, consumed_prompt = KubikAi::Media::ReinterpretPrompt.consume!(kubik_ai)
           pending = {
             "alt_text" => result[:alt_text],
-            "tags" => KubikAi::Media::TagList.normalize(result[:tags]),
+            "tags" => KubikAi::Media::TagList.normalize_ai_tags(result[:tags]),
             "notes" => result[:notes],
             "previous" => {
               "alt_text" => previous_alt,

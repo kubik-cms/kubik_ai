@@ -4,7 +4,7 @@ require "kubik_ai/metatag"
 
 module KubikAi
   class MetatagSuggestJob < ApplicationJob
-    queue_as :default
+    queue_as { KubikAi.config.active_job_queue }
 
     ruby2_keywords def perform(record_class_name, record_id, focus = nil, instructions = nil)
       @focus = focus

@@ -29,7 +29,7 @@ module KubikAi
         end
 
         if overrides.key?(:media_tag_list) || overrides.key?("media_tag_list") || pending.key?("tags")
-          normalized_tags = KubikAi::Media::TagList.normalize(pending["tags"])
+          normalized_tags = KubikAi::Media::TagList.normalize_ai_tags(pending["tags"])
           assign_tags!(normalized_tags)
           pending = pending.merge("tags" => normalized_tags)
         end
@@ -85,7 +85,7 @@ module KubikAi
         data = overrides.with_indifferent_access
         merged["alt_text"] = data[:alt_text] if data.key?(:alt_text)
         if data.key?(:media_tag_list)
-          merged["tags"] = KubikAi::Media::TagList.normalize(data[:media_tag_list])
+          merged["tags"] = KubikAi::Media::TagList.normalize(data[:media_tag_list], from_llm: true)
         end
         merged
       end

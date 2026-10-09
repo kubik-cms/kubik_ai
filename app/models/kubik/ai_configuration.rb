@@ -14,9 +14,11 @@ module Kubik
       auto_apply_tags
       meta_tag_suggestions
       seo_keyword_emphasis
-      prefer_no_faces
       tag_vocabulary_hints
     ].freeze
+
+    DEFAULT_MEDIA_MAX_TAGS = 5
+    MEDIA_MAX_TAGS_LIMIT = 20
 
     CONTEXT_INSTRUCTION_KEYS = %i[media seo social].freeze
 
@@ -29,6 +31,17 @@ module Kubik
         cast_value = key == :tag_vocabulary_hints ? value : ActiveModel::Type::Boolean.new.cast(value)
         self.feature_flags = feature_flags.merge(key.to_s => cast_value)
       end
+    end
+
+    def media_max_tags
+      raw = feature_flags.with_indifferent_access[:media_max_tags]
+      value = raw.present? ? raw.to_i : DEFAULT_MEDIA_MAX_TAGS
+      value = DEFAULT_MEDIA_MAX_TAGS unless value.positive?
+      [value, MEDIA_MAX_TAGS_LIMIT].min
+    end
+
+    def media_max_tags=(value)
+      self.feature_flags = feature_flags.merge("media_max_tags" => value.to_s)
     end
 
     CONTEXT_INSTRUCTION_KEYS.each do |key|
@@ -63,8 +76,8 @@ module Kubik
         auto_apply_tags: true,
         meta_tag_suggestions: true,
         seo_keyword_emphasis: true,
-        prefer_no_faces: false,
-        tag_vocabulary_hints: ""
+        tag_vocabulary_hints: "",
+        media_max_tags: DEFAULT_MEDIA_MAX_TAGS
       }
     end
 

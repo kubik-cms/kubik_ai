@@ -28,10 +28,13 @@ require "kubik_ai/llm/gateway"
 require "kubik_ai/media/tag_list"
 require "kubik_ai/media/sync_stream"
 require "kubik_ai/media/broadcaster"
+require "kubik_ai/media/gallery_indicator"
 require "kubik_ai/media/form_field_renderer"
 require "kubik_ai/media/stale_recovery"
+require "kubik_ai/media/missed_analysis"
 require "kubik_ai/media/panel_sync_attributes"
 require "kubik_ai/media/status"
+require "kubik_ai/media/restart_analysis"
 require "kubik_ai/media_upload_paths"
 require "kubik_ai/media/analyzer"
 require "kubik_ai/media/pending_applier"
@@ -121,9 +124,18 @@ module KubikAi
         KubikAi::ActiveAdmin::MediaUploadActions.register_hooks!
       end
 
+      initializer :kubik_ai_media_upload_extension, after: :kubik_media_library_active_admin do
+        ActiveSupport.on_load(:kubik_media_upload) do
+          include KubikAi::MediaUploadExtension unless include?(KubikAi::MediaUploadExtension)
+        end
+      end
+
       config.to_prepare do
         if defined?(Kubik::MediaUpload)
           Kubik::MediaUpload.include(KubikAi::MediaUploadExtension) unless Kubik::MediaUpload.include?(KubikAi::MediaUploadExtension)
+        end
+        if defined?(Kubik) && Kubik.respond_to?(:register_models!)
+          Kubik.register_models!
         end
 
         next unless defined?(KubikAi::Metatag::StaleRecovery)

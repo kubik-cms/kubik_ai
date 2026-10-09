@@ -2,7 +2,7 @@
 
 # Loaded via ActiveAdmin load_paths (see KubikAi::Engine) so controllers reload in development.
 MEDIA_RESOURCE_AI_KEYS = %i[
-  auto_analyze_on_upload auto_apply_alt_text auto_apply_tags prefer_no_faces tag_vocabulary_hints
+  auto_analyze_on_upload auto_apply_alt_text auto_apply_tags tag_vocabulary_hints
 ].freeze
 
 ActiveAdmin.register Kubik::AiConfiguration do

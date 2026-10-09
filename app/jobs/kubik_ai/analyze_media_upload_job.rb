@@ -2,7 +2,7 @@
 
 module KubikAi
   class AnalyzeMediaUploadJob < ApplicationJob
-    queue_as :default
+    queue_as { KubikAi.config.active_job_queue }
 
     def perform(media_upload_id, operation: "analyze")
       upload = Kubik::MediaUpload.find_by(id: media_upload_id)
@@ -11,6 +11,10 @@ module KubikAi
       config = Kubik::AiConfiguration.instance
       unless config.enabled?
         KubikAi::Media::Status.fail!(upload, message: "AI is disabled in admin settings.")
+        return
+      end
+
+      if operation.to_s == "analyze" && !KubikAi::ResourceSettings.media_value(:auto_analyze_on_upload)
         return
       end
 

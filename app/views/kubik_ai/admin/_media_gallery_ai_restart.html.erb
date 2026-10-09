@@ -1,0 +1,8 @@
+<%= button_to kubik_ai_restart_admin_kubik_media_upload_path(upload),
+              method: :post,
+              form: { data: { turbo: true, turbo_stream: true }, class: "kubik-ai-gallery-indicator__restart-form" },
+              class: "kubik-ai-gallery-indicator__restart",
+              title: "Restart AI analysis",
+              aria: { label: "Restart AI analysis" } do %>
+  <span class="material-symbols-outlined material-icon" aria-hidden="true">refresh</span>
+<% end %>
