@@ -23,6 +23,7 @@ require "kubik_ai/context/compiler"
 
 require "kubik_ai/usage/limiter"
 require "kubik_ai/usage/recorder"
+require "kubik_ai/usage/chart_summary"
 require "kubik_ai/llm/credential_resolver"
 require "kubik_ai/llm/gateway"
 require "kubik_ai/media/tag_list"

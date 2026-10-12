@@ -10,7 +10,9 @@ module KubikAi
                   :plain_text_from_wysiwyg,
                   :metatag_broadcast_only,
                   :prefer_no_faces,
-                  :active_job_queue
+                  :active_job_queue,
+                  :default_spend_cap_cents,
+                  :default_spend_period
 
     def initialize
       @context_providers = {}
@@ -23,6 +25,8 @@ module KubikAi
       @metatag_broadcast_only = false
       @prefer_no_faces = true
       @active_job_queue = :ai
+      @default_spend_cap_cents = 1000
+      @default_spend_period = "monthly"
     end
 
     def suggestion_sets

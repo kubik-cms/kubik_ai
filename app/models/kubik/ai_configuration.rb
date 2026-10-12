@@ -99,6 +99,24 @@ module Kubik
       "AI configuration"
     end
 
+    def effective_spend_cap_cents
+      stored = spend_cap_cents
+      return stored.to_i if stored.present? && stored.to_i.positive?
+
+      default = KubikAi.config.default_spend_cap_cents
+      return nil if default.blank? || default.to_i <= 0
+
+      default.to_i
+    end
+
+    def using_default_spend_cap?
+      spend_cap_cents.blank? || spend_cap_cents.to_i <= 0
+    end
+
+    def spent_in_current_period
+      Kubik::AiUsageEvent.spent_in_period(spend_period)
+    end
+
     def self.cached
       Rails.cache.fetch("kubik/ai_configuration") { instance }
     end

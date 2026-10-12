@@ -1,0 +1,23 @@
+<% if defined?(KubikInterfaceElements) && respond_to?(:render_kubik_chart_progress) %>
+  <% allowance_cents = configuration.effective_spend_cap_cents %>
+  <% period_word = configuration.spend_period == "daily" ? "day" : "month" %>
+  <% allowance_period = configuration.spend_period == "daily" ? "daily" : "monthly" %>
+  <div class="kubik-ai-usage-dashboard">
+    <%= render_kubik_chart_progress(
+          spent_cents: configuration.spent_in_current_period,
+          cap_cents: allowance_cents,
+          period_label: configuration.spend_period,
+          label: "Token usage this #{period_word}"
+        ) %>
+
+    <% chart_summary = KubikAi::Usage::ChartSummary.call(allowance_cents: allowance_cents) %>
+    <%= render_kubik_stacked_bar_chart(
+          labels: chart_summary[:labels],
+          datasets: chart_summary[:datasets],
+          title: "Last 30 days (% of #{allowance_period} allowance)",
+          y_axis_mode: "percent"
+        ) %>
+  </div>
+<% else %>
+  <p class="inline-hints">Usage charts require <code>kubik_interface_elements</code>.</p>
+<% end %>

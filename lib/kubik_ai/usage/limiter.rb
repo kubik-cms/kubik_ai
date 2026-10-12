@@ -9,7 +9,7 @@ module KubikAi
 
       def check!(estimated_cents: 0)
         config = Kubik::AiConfiguration.instance
-        cap = config.spend_cap_cents
+        cap = config.effective_spend_cap_cents
         return if cap.blank? || cap.to_i <= 0
 
         spent = Kubik::AiUsageEvent.spent_in_period(config.spend_period)

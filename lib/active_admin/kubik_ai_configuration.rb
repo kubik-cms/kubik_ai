@@ -84,11 +84,6 @@ ActiveAdmin.register Kubik::AiConfiguration do
             end
           end
         end
-        if defined?(KubikSettings::ResourceResolver) && KubikSettings::ResourceResolver.registered?(:media)
-          panel "Media library" do
-            para link_to("Configure media AI under Media → Settings", KubikSettings::ResourceResolver.edit_path(:media))
-          end
-        end
       end
 
       tab "Features" do
@@ -105,21 +100,21 @@ ActiveAdmin.register Kubik::AiConfiguration do
 
       tab "Limits & usage" do
         attributes_table_for resource do
-          row :spend_cap_cents
-          row :spend_period
-          row "Spent this period" do
-            Kubik::AiUsageEvent.spent_in_period(resource.spend_period)
+          row "Token usage (this period)" do
+            cap = resource.effective_spend_cap_cents
+            spent = resource.spent_in_current_period
+            if cap.present? && cap.positive?
+              percent = [((spent.to_f / cap) * 100).round(1), 100.0].min
+              "#{percent}% of #{resource.spend_period == 'daily' ? 'daily' : 'monthly'} allowance"
+            else
+              "No allowance limit"
+            end
           end
+          row :spend_period
         end
 
-        panel "Recent usage" do
-          table_for Kubik::AiUsageEvent.order(created_at: :desc).limit(25) do
-            column :created_at
-            column :operation
-            column :model
-            column :estimated_cost_cents
-            column :status
-          end
+        panel "Usage" do
+          render partial: "kubik_ai/admin/usage_dashboard", locals: { configuration: resource }
         end
       end
     end
@@ -145,10 +140,6 @@ ActiveAdmin.register Kubik::AiConfiguration do
                                  hint: "Default SEO instructions; Pages and News can override under their index → Settings."
           f.input :context_social, as: :text, input_html: { rows: 6 },
                                    hint: "Default social instructions; content types can override in their Settings."
-        end
-        if defined?(KubikSettings::ResourceResolver) && KubikSettings::ResourceResolver.registered?(:media)
-          para link_to("Media library AI (upload, alt text, tags): Media → Settings",
-                       KubikSettings::ResourceResolver.edit_path(:media))
         end
       end
 
@@ -177,7 +168,8 @@ ActiveAdmin.register Kubik::AiConfiguration do
 
       tab "Limits" do
         f.inputs do
-          f.input :spend_cap_cents, hint: "Leave blank for no cap"
+          f.input :spend_cap_cents,
+                  hint: "Internal allowance override (cents). Leave blank to use the site default from KubikAi config / ENV."
           f.input :spend_period, as: :select, collection: Kubik::AiConfiguration::SPEND_PERIODS
         end
       end
