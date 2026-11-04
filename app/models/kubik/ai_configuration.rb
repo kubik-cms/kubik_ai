@@ -13,6 +13,7 @@ module Kubik
       auto_apply_alt_text
       auto_apply_tags
       meta_tag_suggestions
+      llms_txt_suggestions
       seo_keyword_emphasis
       tag_vocabulary_hints
     ].freeze
@@ -20,7 +21,7 @@ module Kubik
     DEFAULT_MEDIA_MAX_TAGS = 5
     MEDIA_MAX_TAGS_LIMIT = 20
 
-    CONTEXT_INSTRUCTION_KEYS = %i[media seo social].freeze
+    CONTEXT_INSTRUCTION_KEYS = %i[media seo social llms_txt].freeze
 
     FEATURE_FLAG_KEYS.each do |key|
       define_method(key) do
@@ -75,6 +76,7 @@ module Kubik
         auto_apply_alt_text: true,
         auto_apply_tags: true,
         meta_tag_suggestions: true,
+        llms_txt_suggestions: true,
         seo_keyword_emphasis: true,
         tag_vocabulary_hints: "",
         media_max_tags: DEFAULT_MEDIA_MAX_TAGS

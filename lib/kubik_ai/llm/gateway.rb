@@ -19,6 +19,10 @@ module KubikAi
         new.complete_json!(prompt: prompt, operation: operation, subject: subject, model: model)
       end
 
+      def self.complete(prompt:, operation:, subject: nil, model: nil)
+        new.complete(prompt: prompt, operation: operation, subject: subject, model: model)
+      end
+
       def ping!
         KubikAi::Usage::Limiter.check!
         config = Kubik::AiConfiguration.instance
@@ -43,6 +47,38 @@ module KubikAi
           response: nil,
           status: "error",
           error_message: e.message
+        )
+        raise KubikAi::LlmError, e.message
+      end
+
+      def complete(prompt:, operation:, subject: nil, model: nil)
+        KubikAi::Usage::Limiter.check!
+        config = Kubik::AiConfiguration.instance
+        KubikAi::Llm::CredentialResolver.apply!(config: config)
+
+        chat_model = model.presence || config.vision_model.presence || KubikAi.config.default_text_model
+        response = RubyLLM.chat(model: chat_model).ask(prompt)
+
+        record_usage!(
+          operation: operation,
+          model: chat_model,
+          response: response,
+          status: "success",
+          subject: subject,
+          metadata: { prompt_version: KubikAi.config.prompt_version }
+        )
+
+        response.content.to_s
+      rescue KubikAi::SpendCapExceeded
+        raise
+      rescue StandardError => e
+        record_usage!(
+          operation: operation,
+          model: model || config&.vision_model,
+          response: nil,
+          status: "error",
+          error_message: e.message,
+          subject: subject
         )
         raise KubikAi::LlmError, e.message
       end

@@ -50,6 +50,9 @@ require "kubik_ai/resource_settings"
 require "kubik_ai/media_upload_extension"
 require "kubik_ai/media_upload_helper"
 require "kubik_ai/metatag_admin_helper"
+require "kubik_ai/llms_txt/suggestor"
+require "kubik_ai/llms_txt_admin_helper"
+require "kubik_ai/active_admin/llms_txt_actions"
 
 module KubikAi
   class << self
@@ -87,6 +90,7 @@ module KubikAi
         ActiveSupport.on_load(:action_view) do
           include KubikAi::MediaUploadHelper
           include KubikAi::MetatagAdminHelper
+          include KubikAi::LlmsTxtAdminHelper
         end
       end
 
@@ -114,6 +118,12 @@ module KubikAi
 
       initializer :kubik_ai_metatag_actions do
         KubikAi::ActiveAdmin::MetatagActions
+      end
+
+      initializer :kubik_ai_llms_txt_actions do
+        ActiveSupport.on_load(:active_admin) do
+          KubikAi::ActiveAdmin::LlmsTxtActions.register!
+        end
       end
 
       initializer :kubik_ai_active_admin do

@@ -3,12 +3,13 @@
 module KubikAi
   module Context
     module Scopes
-      INSTRUCTION_KEYS = %i[media seo social].freeze
+      INSTRUCTION_KEYS = %i[media seo social llms_txt].freeze
 
       HEADINGS = {
         media: "Media library (alt text & tags)",
         seo: "SEO & search targeting",
-        social: "Social sharing"
+        social: "Social sharing",
+        llms_txt: "llms.txt generation"
       }.freeze
 
       module_function
