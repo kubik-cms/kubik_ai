@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### Package
+
+- `@kubik-cms/kubik_ai` **0.2.1** — version bump; rebuild `package/` when JS changes land.
+
 ## [0.4.3] - 2026-11-04
 
 ### Added
